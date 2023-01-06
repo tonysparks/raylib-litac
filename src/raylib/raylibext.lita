@@ -1,0 +1,93 @@
+import "raylib"
+import "libc" as c
+/*
+    Raylib Extension functions
+*/
+
+public const fontColors = []Color {
+    Color{},  // 0
+    WHITE,    // 1
+    BLACK,    // 2
+    RED,      // 3
+    BLUE,     // 4
+    GREEN,    // 5
+    YELLOW,   // 6
+    GRAY,     // 7
+    DARKGRAY, // 8
+    DARKBLUE, // 9
+}
+
+public func DrawShadowedTextRec(font: Font, text: *const char, rec: Rectangle, fontSize: f32, spacing: f32, wordWrap: bool, tint: Color, shadowColor: Color = BLACK) {
+    var s = Rectangle {
+        .x = rec.x - 1,
+        .y = rec.y + 1,
+        .width = rec.width,
+        .height = rec.height
+    }
+    DrawTextRec(font, text, s, fontSize, spacing, wordWrap, shadowColor)
+    DrawTextRec(font, text, rec, fontSize, spacing, wordWrap, tint)
+}
+
+public func DrawColoredText(font: Font, text: *const char, pos: Vec2, fontSize: f32, spacing: f32, tint: Color, shadowColor: Color = BLACK) {
+    var charStr: [2]char;
+    charStr[1] = '\0'
+
+    var original = tint;
+    for(var c = text; *c; c+=1) {
+        charStr[0] = *c;
+
+        if(*c == '^') {
+            var nChar: char = *(c + 1)
+            if(c::isdigit(nChar)) {
+                c += 1
+
+                var digit = nChar - 48
+                if(digit == 0) {
+                    tint = original
+                }
+                else {
+                    tint = fontColors[digit]
+                }
+                continue
+            }
+        }
+
+        var textWidth = MeasureTextEx(font, charStr, fontSize as (i32), spacing)
+        DrawTextEx(font, charStr, Vec2{pos.x-1, pos.y+1}, fontSize, spacing, shadowColor)
+        DrawTextEx(font, charStr, pos, fontSize, spacing, tint)
+
+        pos.x += textWidth.x + spacing
+    }
+}
+
+public func (c: *Color) lerp(dest: Color, t: f32) {
+    var cr = c.r as (f32) / 255f
+    var dr = dest.r as (f32) / 255f
+    var red = (1.0f - t) * cr + (t * dr)
+
+    var cg = c.g as (f32) / 255f
+    var dg = dest.g as (f32) / 255f
+    var green = (1.0f - t) * cg + (t * dg)
+
+    var cb = c.b as (f32) / 255f
+    var db = dest.b as (f32) / 255f
+    var blue = (1.0f - t) * cb + (t * db)
+
+    var ca = c.a as (f32) / 255f
+    var da = dest.a as (f32) / 255f
+    var alpha = (1.0f - t) * ca + (t * da)
+
+    c.r = 255_u8 * red
+    c.g = 255_u8 * green
+    c.b = 255_u8 * blue
+    c.a = 255_u8 * alpha
+}
+
+public func ColorAlpha(c: Color, a: u8) : Color {
+    return Color {
+        .r = c.r,
+        .g = c.g,
+        .b = c.b,
+        .a = a
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "repo" : "https://github.com/tonysparks",
+    "name" : "raylib-litac",
+    "version" : "0.1-alpha",
+    "type": "source",
+    "dependencies": [],
+    "dynamic_libraries": [
+        "raylib.dll"
+    ],
+    "commands" : {
+        "test": "./src/raylib/raylib.lita -test -verbose",
+        "build": ""
+    }
+}
